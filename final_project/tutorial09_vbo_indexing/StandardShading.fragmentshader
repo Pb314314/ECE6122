@@ -1,0 +1,80 @@
+#version 120
+
+// Interpolated values from the vertex shaders
+varying vec2 UV;
+
+varying vec3 Position_worldspace;
+varying vec3 Normal_cameraspace;
+varying vec3 EyeDirection_cameraspace;
+
+varying vec3 LightDirection_cameraspace1;
+varying vec3 LightDirection_cameraspace2;
+varying vec3 LightDirection_cameraspace3;
+varying vec3 LightDirection_cameraspace4;
+
+//varying vec3 fragmentcolor;
+
+// Values that stay constant for the whole mesh.
+uniform sampler2D myTextureSampler1;
+uniform sampler2D myTextureSampler2;
+uniform mat4 MV;
+
+uniform int Pressed_L;
+uniform int isRectangle;
+uniform float light_power0;
+uniform float light_power1;
+uniform float light_power2;
+uniform float light_power3;
+
+uniform vec3 Lightlocation1;
+uniform vec3 Lightlocation2;
+uniform vec3 Lightlocation3;
+uniform vec3 Lightlocation4;
+
+vec3 light(vec3 LW, vec3 LD, vec3 MC, vec3 MD, vec3 MS, vec3 LC, float LP);
+
+void main(){
+
+	// Light emission properties
+	// You probably want to put them as uniforms
+	vec3 LightColor = vec3(1,1,1);
+	float LightPower = 50.0f;
+	
+	// Material properties
+	vec3 MaterialDiffuseColor = texture2D( myTextureSampler1, UV ).rgb;
+	if(isRectangle==1) {MaterialDiffuseColor = texture2D( myTextureSampler2, UV ).rgb;}
+
+	vec3 MaterialAmbientColor = vec3(0.1,0.1,0.1) * MaterialDiffuseColor;
+	vec3 MaterialSpecularColor = vec3(0.3,0.3,0.3);	
+
+	vec3 result1 = light(Lightlocation1, LightDirection_cameraspace1, MaterialAmbientColor, MaterialDiffuseColor, MaterialSpecularColor, LightColor, light_power0);
+	vec3 result2 = light(Lightlocation2, LightDirection_cameraspace2, MaterialAmbientColor, MaterialDiffuseColor, MaterialSpecularColor, LightColor, light_power1);
+	vec3 result3 = light(Lightlocation3, LightDirection_cameraspace3, MaterialAmbientColor, MaterialDiffuseColor, MaterialSpecularColor, LightColor, light_power2);
+	vec3 result4 = light(Lightlocation4, LightDirection_cameraspace4, MaterialAmbientColor, MaterialDiffuseColor, MaterialSpecularColor, LightColor, light_power3);
+	gl_FragColor.rgb = result1 + result2 + result3 + result4;
+
+}
+vec3 light(vec3 LW, vec3 LD, vec3 MC, vec3 MD, vec3 MS, vec3 LC, float LP)
+{
+	// Distance to the light
+	float dis = length( LW - Position_worldspace );
+	vec3 n = normalize( Normal_cameraspace );
+
+	vec3 l = normalize( LD );
+	float cosTheta = clamp( dot( n,l ), 0,1 );
+	vec3 E = normalize(EyeDirection_cameraspace);
+
+	vec3 R = reflect(-l,n);
+
+	float cosAlpha = clamp( dot( E,R ), 0,1 );
+
+	vec3 color = 
+		// Ambient : simulates indirect lighting
+		MC +
+		// Diffuse : "color" of the object
+		MD * LC * LP * cosTheta / (dis*dis) +
+		// Specular : reflective highlight, like a mirror
+		MS * LC * LP * pow(cosAlpha,5) / (dis*dis);
+
+	return color;
+}

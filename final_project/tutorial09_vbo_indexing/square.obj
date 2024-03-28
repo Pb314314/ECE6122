@@ -1,0 +1,20 @@
+# Square.obj
+
+# Vertex positions
+v -5 5 -5
+v -5 -5 -5
+v 5 -5 -5
+v 5 5 -5
+
+# Texture Coordinates (UVs)
+vt 0 1
+vt 0 0
+vt 1 0
+vt 1 1
+
+# Normals 
+vn 0 0 1
+
+# Faces (defined using vertex positions, texture coordinates, and normals)
+f 1/1/1 2/2/1 3/3/1
+f 1/1/1 3/3/1 4/4/1

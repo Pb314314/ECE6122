@@ -1,0 +1,18 @@
+# this is the cmakefile on Pace
+set(SRCROOT ${PROJECT_SOURCE_DIR}/examples/sockets)
+
+# all source files
+set(SRC ${SRCROOT}/client.cpp)
+set(SRC ${SRCROOT}/server.cpp)
+
+# define the sockets target
+sfml_add_example(client
+                 SOURCES ${SRC}
+                 DEPENDS sfml-network)
+sfml_add_example(server
+                 SOURCES ${SRC}
+                 DEPENDS sfml-network)     
+                    
+find_package(Threads REQUIRED)
+target_link_libraries(client PRIVATE Threads::Threads)
+target_link_libraries(server PRIVATE Threads::Threads)
